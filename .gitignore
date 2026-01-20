@@ -1,0 +1,32 @@
+## Node / Nest build artifacts
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+## Env files (keep examples)
+.env
+.env.*
+!.env.example
+!env.example
+
+## Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+## OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+## Test artifacts
+.nyc_output/
+
+## Misc
+tmp/
+
