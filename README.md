@@ -61,3 +61,10 @@ Background processor:
 - delivers the event (for this task — logs it)
 - marks it as `PROCESSED`, or as `FAILED` on error with backoff and retries
 
+
+
+![Screenshot](<Screenshot 2026-01-20 at 12.11.56 PM.png>)
+
+
+
+
