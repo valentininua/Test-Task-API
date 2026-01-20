@@ -61,4 +61,6 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
 - помечает `PROCESSED`, а при ошибке — `FAILED` с backoff и повторами
 
 
+![Screenshot](<Screenshot 2026-01-20 at 12.11.56 PM.png>)
+
 
