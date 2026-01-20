@@ -1,32 +1,32 @@
-## Test task server (NestJS + MongoDB)
+## Test Task Server (NestJS + MongoDB)
 
-### Что сделано
+### What’s implemented
 - **Framework**: NestJS (Node.js **v22+**)
 - **DB**: MongoDB + **Mongoose**
-- **Архитектура**: DDD-style folders + **CQRS** (`@nestjs/cqrs`)
-- **Pagination**: **cursor-based** (по `_id`, base64 cursor)
-- **Outbox**: коллекция `outbox_events` + processor (claim/lock + retries), который “доставляет” события через логирование
-- **Swagger**: доступен на `GET /api/docs`
-- **JWT auth**: Bearer token в `Authorization: Bearer <token>`
+- **Architecture**: DDD-style folders + **CQRS** (`@nestjs/cqrs`)
+- **Pagination**: **cursor-based** (by `_id`, base64 cursor)
+- **Outbox**: `outbox_events` collection + processor (claim/lock + retries) that “delivers” events via logging
+- **Swagger**: available at `GET /api/docs`
+- **JWT auth**: Bearer token in `Authorization: Bearer <token>`
 
-### Эндпоинты (как в задании)
-- `POST /api/v1/add-user` — создаёт пользователя (если поля не переданы — генерируются случайно), сохраняет в Mongo и пишет лог
-- `GET /api/v1/get-users` — cursor pagination + фильтры `name/email/phone`
-- `GET /api/v1/get-user/:id` — получить пользователя по id
+### Endpoints (as per the task)
+- `POST /api/v1/add-user` — creates a user (if fields are not provided, they are generated randomly), saves to MongoDB and writes a log
+- `GET /api/v1/get-users` — cursor-based pagination + filters by `name/email/phone`
+- `GET /api/v1/get-user/:id` — get a user by id
 
-Дополнительно (нужно чтобы получить JWT):
-- `POST /api/v1/auth/login` — выдаёт `accessToken`
+Additional (required to obtain JWT):
+- `POST /api/v1/auth/login` — returns an `accessToken`
 
-### Запуск через Docker
-1) Создайте `.env` (копия `env.example`)
+### Run with Docker
+1) Create `.env` (copy from `env.example`)
 
-2) Запуск:
+2) Run:
 
 ```bash
 docker compose up --build
 ```
 
-Или одной командой:
+Or in a single command:
 
 ```bash
 chmod +x ./run.sh && ./run.sh
@@ -35,12 +35,12 @@ chmod +x ./run.sh && ./run.sh
 Swagger: `http://localhost:3000/api/docs`
 
 ### Auth
-Для тестового задания авторизация упрощена: есть один “технический” пользователь.
-Логин/пароль берутся из env:
-- `AUTH_USERNAME` (по умолчанию `admin`)
-- `AUTH_PASSWORD` (по умолчанию `admin`)
+For the test task, authorization is simplified: there is a single “technical” user.
+Login/password are taken from env:
+- `AUTH_USERNAME` (default: `admin`)
+- `AUTH_PASSWORD` (default: `admin`)
 
-Получить токен:
+Get a token:
 
 ```bash
 curl -X POST http://localhost:3000/api/v1/auth/login \
@@ -48,19 +48,16 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
   -d '{"username":"admin","password":"admin"}'
 ```
 
-### Seed 2,000,000 пользователей
-На старте, если коллекция `users` пустая и `SEED_ON_STARTUP=true`, сервис создаст `SEED_USERS_COUNT` пользователей батчами `SEED_BATCH_SIZE`.
+### Seeding 2,000,000 users
+On startup, if the `users` collection is empty and `SEED_ON_STARTUP=true`, the service will create `SEED_USERS_COUNT` users in batches of `SEED_BATCH_SIZE`.
 
-Важно: запросы `get-users/get-user` ждут окончания сидинга (чтобы не было гонок на первом запуске).
+**Important:** `get-users` / `get-user` requests wait until seeding is finished (to avoid race conditions on the first run).
 
 ### Outbox
-При создании пользователя пишется запись в `outbox_events` со статусом `PENDING`.
-Фоновый процессор:
-- атомарно “забирает” событие (`PENDING/FAILED -> PROCESSING`), чтобы избежать дублей при нескольких инстансах
-- “доставляет” событие (в рамках задания — логирует)
-- помечает `PROCESSED`, а при ошибке — `FAILED` с backoff и повторами
+When a user is created, a record is written to `outbox_events` with status `PENDING`.
 
-
-![Screenshot](<Screenshot 2026-01-20 at 12.11.56 PM.png>)
-
+Background processor:
+- atomically claims an event (`PENDING/FAILED → PROCESSING`) to avoid duplicates across multiple instances
+- delivers the event (for this task — logs it)
+- marks it as `PROCESSED`, or as `FAILED` on error with backoff and retries
 
